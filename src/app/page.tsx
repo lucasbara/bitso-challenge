@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Logo from './svgs/logo.svg';
 
-export default function Home() {
+export default function Landing() {
   return (
     <div className="bg-gray-900 min-h-screen text-white font-sans relative overflow-hidden flex items-center justify-center">
       <main className="container mx-auto px-4 text-center">
