@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Logo from './svgs/logo.svg';
 
 export default function Landing() {
@@ -26,9 +27,10 @@ export default function Landing() {
         </h1>
         <p className="text-gray-400 mb-8">The delightfully smart platform.</p>
         <div className="flex justify-center">
-          <button className="bg-lime-600 px-6 py-3 rounded-md hover:bg-lime-800 text-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105">
+          <ConnectButton />
+          {/* <button className="bg-lime-600 px-6 py-3 rounded-md hover:bg-lime-800 text-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105">
             Connect Wallet
-          </button>
+          </button> */}
         </div>
       </main>
     </div>
