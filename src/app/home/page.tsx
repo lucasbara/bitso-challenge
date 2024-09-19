@@ -17,10 +17,11 @@ import { toast } from 'react-toastify';
 import { contractConfig } from '@/lib/wagmi';
 import Logo from '@/svgs/logo.svg';
 import Spinner from '@/components/spinner';
+import { Address, parseEther } from 'viem';
 
 export default function Home() {
-  const [recipientAddress, setRecipientAddress] = useState('');
-  const [amount, setAmount] = useState<'' | number>('');
+  const [recipientAddress, setRecipientAddress] = useState<Address | ''>('');
+  const [amount, setAmount] = useState('');
 
   const router = useRouter();
   const { address, isConnected: isWalletConnected } = useAccount();
@@ -44,7 +45,7 @@ export default function Home() {
       return;
     }
 
-    if (!amount || isNaN(amount) || amount <= 0) {
+    if (!amount || parseInt(amount) <= 0) {
       toast.error('Please enter a valid amount greater than zero.');
       return;
     }
@@ -57,7 +58,7 @@ export default function Home() {
       const result = await writeContractAsync({
         ...contractConfig,
         functionName: 'transfer',
-        args: [recipientAddress, BigInt(amount * 1e18)], // Convert to wei (18 decimals)
+        args: [recipientAddress, parseEther(amount)],
       });
 
       if (!result) {
