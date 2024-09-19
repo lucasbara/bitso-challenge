@@ -6,26 +6,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import {
-  useAccount,
-  useWriteContract,
-  useReadContract,
-  useBalance,
-} from 'wagmi';
+import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { toast } from 'react-toastify';
+import { config } from '@/lib/wagmi';
 
 import { contractConfig } from '@/lib/wagmi';
 import Logo from '@/svgs/logo.svg';
 import Spinner from '@/components/spinner';
-import { Address, parseEther } from 'viem';
+import { Address, encodeFunctionData, formatEther, parseEther } from 'viem';
+import { estimateGas } from '@wagmi/core';
 
 export default function Home() {
+  const [isLoading, setisLoading] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<Address | ''>('');
   const [amount, setAmount] = useState('');
 
   const router = useRouter();
   const { address, isConnected: isWalletConnected } = useAccount();
-  const { refetch } = useBalance();
+
   const { data: balance } = useReadContract({
     ...contractConfig,
     functionName: 'balanceOf',
@@ -50,6 +48,21 @@ export default function Home() {
       return;
     }
 
+    setisLoading(true);
+
+    const estimatedGas = await estimateGas(config, {
+      to: contractConfig.address,
+      data: encodeFunctionData({
+        abi: contractConfig.abi,
+        functionName: 'transfer',
+        args: [recipientAddress, parseEther(amount)],
+      }),
+    });
+
+    toast.info(`Estimated gas for transfer: ${formatEther(estimatedGas)} ETH`, {
+      autoClose: false,
+      toastId: 'gasEstimate',
+    });
     try {
       toast.info('Initiating transfer...', {
         autoClose: false,
@@ -76,10 +89,11 @@ export default function Home() {
     } finally {
       toast.dismiss('transferPending');
     }
-    refetch();
+    setisLoading(false);
   };
 
   const handleClaim = async () => {
+    setisLoading(true);
     try {
       toast.info('Claiming tokens...', {
         autoClose: false,
@@ -104,7 +118,7 @@ export default function Home() {
     } finally {
       toast.dismiss('claimPending');
     }
-    refetch();
+    setisLoading(false);
   };
 
   return (
@@ -153,15 +167,25 @@ export default function Home() {
                 className="w-full mb-4 p-2 rounded bg-gray-800 text-white"
               />
               <button
+                disabled={isLoading}
                 type="submit"
-                className="bg-lime-600 px-6 py-3 rounded-md hover:bg-lime-800 text-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105 w-full mb-4"
+                className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full mb-4 ${
+                  isLoading
+                    ? 'bg-lime-900' // Color for disabled state
+                    : 'bg-lime-600 hover:bg-lime-800' // Color for active state
+                }`}
               >
                 Send Tokens
               </button>
             </form>
             <button
+              disabled={isLoading}
               onClick={handleClaim}
-              className="bg-blue-600 px-6 py-3 rounded-md hover:bg-blue-800 text-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105 w-full max-w-md mb-8"
+              className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full max-w-md mb-8 ${
+                isLoading
+                  ? 'bg-blue-900' // Color for disabled state
+                  : 'bg-blue-600 hover:bg-blue-800' // Color for active state
+              }`}
             >
               Claim 100 BTS Tokens
             </button>
