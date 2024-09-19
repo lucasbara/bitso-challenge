@@ -148,7 +148,7 @@ export default function Home() {
               <input
                 type="number"
                 value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
                 className="w-full mb-4 p-2 rounded bg-gray-800 text-white"
               />
