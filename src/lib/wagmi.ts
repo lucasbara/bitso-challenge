@@ -1,5 +1,6 @@
 import { sepolia } from 'wagmi/chains';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { ContractConfig } from '@/types/wagmi';
 
 export const config = getDefaultConfig({
   appName: 'Bitso Challenge',
@@ -8,7 +9,7 @@ export const config = getDefaultConfig({
   ssr: true,
 });
 
-export const contractConfig = {
+export const contractConfig: ContractConfig = {
   address: '0xE80219BD075cf30278Bd434c3d5921a4fA3b05D4',
   abi: [
     {
