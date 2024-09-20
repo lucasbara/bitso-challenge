@@ -1,8 +1,13 @@
 'use client';
 
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 
-import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import {
+  useAccount,
+  useWriteContract,
+  useReadContract,
+  useWaitForTransactionReceipt,
+} from 'wagmi';
 import { toast } from 'react-toastify';
 import { config } from '@/lib/wagmi';
 
@@ -12,23 +17,49 @@ import { estimateGas } from '@wagmi/core';
 import Chip from '@/components/chip';
 
 export default function Home() {
-  const [isLoading, setisLoading] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<Address | ''>('');
   const [amount, setAmount] = useState('');
 
   const { address } = useAccount();
 
-  const { data: balance } = useReadContract({
+  const { data: balance, refetch: refetchBalance } = useReadContract({
     ...contractConfig,
     functionName: 'balanceOf',
     args: [address],
   });
-  const { writeContractAsync } = useWriteContract();
+  const { data: hash, error, isPending, writeContract } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
+
+  useEffect(() => {
+    if (isPending) {
+      toast.info('Transaction is pending...');
+    }
+    if (error) {
+      toast.error(`Transaction failed: ${error.message}`, {
+        toastId: 'txFailed',
+      });
+    }
+    if (isConfirming) {
+      toast.info('Confirming transaction...', { autoClose: false });
+    }
+    if (isConfirmed) {
+      toast.success('Transaction confirmed!');
+      refetchBalance();
+    }
+  }, [isConfirming, isConfirmed, isPending, error, refetchBalance]);
 
   const handleTransfer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setisLoading(true);
+    writeContract({
+      ...contractConfig,
+      functionName: 'transfer',
+      args: [recipientAddress, parseEther(amount)],
+    });
 
     const estimatedGas = await estimateGas(config, {
       to: contractConfig.address,
@@ -39,66 +70,14 @@ export default function Home() {
       }),
     });
 
-    toast.info(`Estimated gas for transfer: ${formatEther(estimatedGas)} ETH`, {
-      autoClose: false,
-      toastId: 'gasEstimate',
-    });
-    try {
-      toast.info('Initiating transfer...', {
-        autoClose: false,
-        toastId: 'transferPending',
-      });
-      const result = await writeContractAsync({
-        ...contractConfig,
-        functionName: 'transfer',
-        args: [recipientAddress, parseEther(amount)],
-      });
-
-      if (!result) {
-        toast.error('Transaction failed. Check the console for details.');
-      } else {
-        toast.success(
-          'Transaction successful! You can view it on a block explorer.'
-        );
-        setRecipientAddress('');
-        setAmount('');
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast.error('An unexpected error occurred. Please try again later.');
-    } finally {
-      toast.dismiss('transferPending');
-    }
-    setisLoading(false);
+    toast.info(`Estimated gas for transfer: ${formatEther(estimatedGas)} ETH`);
   };
 
   const handleClaim = async () => {
-    setisLoading(true);
-    try {
-      toast.info('Claiming tokens...', {
-        autoClose: false,
-        toastId: 'claimPending',
-      });
-      const result = await writeContractAsync({
-        ...contractConfig,
-        functionName: 'claimTokens',
-      });
-
-      if (!result) {
-        toast.error(
-          'Failed to claim tokens. Please check the console for details.'
-        );
-      } else {
-        toast.success('Tokens claimed successfully! 🦄');
-      }
-    } catch {
-      toast.error(
-        'An unexpected error occurred while claiming tokens. Please try again later.'
-      );
-    } finally {
-      toast.dismiss('claimPending');
-    }
-    setisLoading(false);
+    writeContract({
+      ...contractConfig,
+      functionName: 'claimTokens',
+    });
   };
 
   return (
@@ -112,7 +91,7 @@ export default function Home() {
       </h1>
       <p className="text-gray-400 mb-8">
         {balance
-          ? `You have ${Number(balance) / 1e18} BTS`
+          ? `You have ${formatEther(balance as bigint)} BTS`
           : 'You have no tokens'}
       </p>
       <form onSubmit={handleTransfer} className="max-w-md w-full mb-8">
@@ -120,9 +99,11 @@ export default function Home() {
           aria-label="Recipient"
           type="text"
           value={recipientAddress}
-          onChange={(e) => setRecipientAddress(e.target.value)}
+          onChange={(e) => setRecipientAddress(e.target.value as Address)}
           placeholder="Recipient Address"
+          pattern="^0x[a-fA-F0-9]{40}$"
           className="w-full mb-4 p-2 rounded bg-gray-800 text-white"
+          required
         />
         <input
           aria-label="Amount"
@@ -131,12 +112,13 @@ export default function Home() {
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
           className="w-full mb-10 p-2 rounded bg-gray-800 text-white"
+          required
         />
         <button
-          disabled={isLoading || !recipientAddress || !amount}
+          disabled={isPending || !recipientAddress || !amount}
           type="submit"
           className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full  ${
-            isLoading || !recipientAddress || !amount
+            isPending || !recipientAddress || !amount
               ? 'bg-lime-900'
               : 'bg-lime-600 hover:bg-lime-800'
           }`}
@@ -145,10 +127,10 @@ export default function Home() {
         </button>
       </form>
       <button
-        disabled={isLoading}
+        disabled={isPending}
         onClick={handleClaim}
         className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full max-w-md  ${
-          isLoading ? 'bg-blue-900' : 'bg-blue-600 hover:bg-blue-800'
+          isPending ? 'bg-blue-900' : 'bg-blue-600 hover:bg-blue-800'
         }`}
       >
         Claim 100 BTS Tokens
