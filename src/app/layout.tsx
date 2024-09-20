@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import 'react-toastify/dist/ReactToastify.css';
 import '@/styles/globals.css';
 import Providers from './providers';
+import Header from '@/components/header';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="bg-gray-900 h-screen text-white fonts-inter">
+            <Header />
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
