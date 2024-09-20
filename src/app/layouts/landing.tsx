@@ -1,5 +1,7 @@
 import { useAccount } from 'wagmi';
+
 import Spinner from '@/components/spinner';
+import Chip from '@/components/chip';
 
 export default function Landing() {
   const {
@@ -14,9 +16,7 @@ export default function Landing() {
         <Spinner />
       ) : (
         <>
-          <div className="inline-block bg-gray-800 text-xs px-3 py-1 rounded-full mt-3 mb-6">
-            dApp Challenge
-          </div>
+          <Chip label="dApp Challenge" />
           <h1 className="text-5xl font-bold mb-4 text-white">
             The future of crypto
             <br />
