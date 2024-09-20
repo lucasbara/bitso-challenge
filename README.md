@@ -51,7 +51,7 @@ This decentralized application (dApp) allows users to interact with an ERC-20 to
 
 ## Smart Contract
 
-The ERC-20 token contract is deployed on the Sepolia testnet.
+The ERC-20 token contract is deployed on the Sepolia testnet. For more information, go to `https://sepolia.etherscan.io/address/0xE80219BD075cf30278Bd434c3d5921a4fA3b05D4`
 
 ## Author
 
