@@ -2,7 +2,7 @@
 
 import { useAccount } from 'wagmi';
 
-import Home from './home/page';
+import Home from './layouts/home';
 import Landing from './layouts/landing';
 
 export default function Main() {
@@ -12,9 +12,12 @@ export default function Main() {
     isReconnecting: isWalletReconnecting,
   } = useAccount();
 
+  const isWalletDisconnected =
+    isWalletConnecting || !isWalletConnected || isWalletReconnecting;
+
   return (
     <main className="flex flex-col justify-center items-center h-[90%] w-full px-4 text-center">
-      {isWalletConnected ? <Home /> : <Landing />}
+      {isWalletDisconnected ? <Landing /> : <Home />}
     </main>
   );
 }
