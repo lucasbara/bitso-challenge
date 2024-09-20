@@ -9,10 +9,10 @@ export default function Landing() {
     isReconnecting: isWalletReconnecting,
   } = useAccount();
 
-  const isLoading = isWalletConnecting || isWalletReconnecting;
+  const isWalletLoading = isWalletConnecting || isWalletReconnecting;
   return (
     <main className="flex flex-col justify-center items-center h-[90%] w-full px-4 text-center">
-      {isLoading ? (
+      {isWalletLoading ? (
         <Spinner />
       ) : (
         <>
