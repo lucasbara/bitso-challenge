@@ -27,11 +27,12 @@ export default function Home() {
     args: [address],
   });
   const { data: hash, error, isPending, writeContract } = useWriteContract();
-
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
+
+  const isSubmitDisabled = isPending || !recipientAddress || !amount;
 
   useEffect(() => {
     if (isPending) {
@@ -72,7 +73,7 @@ export default function Home() {
     toast.info(`Estimated gas for transfer: ${formatEther(estimatedGas)} ETH`);
   };
 
-  const handleClaim = async () => {
+  const handleClaim = () => {
     writeContract({
       ...contractConfig,
       functionName: 'claimTokens',
@@ -114,12 +115,10 @@ export default function Home() {
           required
         />
         <button
-          disabled={isPending || !recipientAddress || !amount}
+          disabled={isSubmitDisabled}
           type="submit"
           className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full  ${
-            isPending || !recipientAddress || !amount
-              ? 'bg-lime-900'
-              : 'bg-lime-600 hover:bg-lime-800'
+            isSubmitDisabled ? 'bg-lime-900' : 'bg-lime-600 hover:bg-lime-800'
           }`}
         >
           Send Tokens
