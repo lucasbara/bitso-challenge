@@ -1,6 +1,6 @@
 import { sepolia } from 'wagmi/chains';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { ContractConfig } from '@/types/wagmi';
+import { ContractConfig } from '@/app/types/wagmi';
 
 export const config = getDefaultConfig({
   appName: 'Bitso Challenge',

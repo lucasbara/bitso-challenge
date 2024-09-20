@@ -1,7 +1,7 @@
 import { useAccount } from 'wagmi';
 
-import Spinner from '@/components/spinner';
-import Chip from '@/components/chip';
+import Spinner from '@/app/components/spinner';
+import Chip from '@/app/components/chip';
 
 export default function Landing() {
   const {

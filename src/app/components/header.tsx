@@ -4,7 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import Logo from '@/svgs/logo.svg';
+import Logo from '@/app/svgs/logo.svg';
 
 export default function Header() {
   return (

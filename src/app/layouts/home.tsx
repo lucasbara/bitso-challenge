@@ -9,12 +9,11 @@ import {
   useWaitForTransactionReceipt,
 } from 'wagmi';
 import { toast } from 'react-toastify';
-import { config } from '@/lib/wagmi';
-
-import { contractConfig } from '@/lib/wagmi';
 import { Address, encodeFunctionData, formatEther, parseEther } from 'viem';
 import { estimateGas } from '@wagmi/core';
-import Chip from '@/components/chip';
+
+import { config, contractConfig } from '@/app/lib/wagmi';
+import Chip from '@/app/components/chip';
 
 export default function Home() {
   const [recipientAddress, setRecipientAddress] = useState<Address | ''>('');
