@@ -2,14 +2,25 @@ import { useAccount } from 'wagmi';
 
 import Spinner from '@/app/components/spinner';
 import Chip from '@/app/components/chip';
+import { useEffect, useState } from 'react';
 
 export default function Landing() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const {
     isConnecting: isWalletConnecting,
     isReconnecting: isWalletReconnecting,
+    isConnected,
   } = useAccount();
 
-  const isWalletLoading = isWalletConnecting || isWalletReconnecting;
+  const isWalletLoading =
+    isWalletConnecting || isWalletReconnecting || isLoading;
+
+  useEffect(() => {
+    setIsLoading(false);
+    // Prevents initial content flash while waiting for wallet connection
+  }, [isConnected]);
+
   return (
     <main className="flex flex-col justify-center items-center h-[90%] w-full px-4 text-center">
       {isWalletLoading ? (
