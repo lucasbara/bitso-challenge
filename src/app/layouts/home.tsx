@@ -1,8 +1,6 @@
 'use client';
 
-import React, { FormEvent, useEffect, useState } from 'react';
-
-import { useRouter } from 'next/navigation';
+import React, { FormEvent, useState } from 'react';
 
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { toast } from 'react-toastify';
@@ -18,8 +16,7 @@ export default function Home() {
   const [recipientAddress, setRecipientAddress] = useState<Address | ''>('');
   const [amount, setAmount] = useState('');
 
-  const router = useRouter();
-  const { address, isConnected: isWalletConnected } = useAccount();
+  const { address } = useAccount();
 
   const { data: balance } = useReadContract({
     ...contractConfig,
@@ -28,22 +25,8 @@ export default function Home() {
   });
   const { writeContractAsync } = useWriteContract();
 
-  useEffect(() => {
-    if (!isWalletConnected) router.push('/');
-  }, [isWalletConnected, router]);
-
   const handleTransfer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!recipientAddress) {
-      toast.error('Please enter a valid recipient address.');
-      return;
-    }
-
-    if (!amount || parseInt(amount) <= 0) {
-      toast.error('Please enter a valid amount greater than zero.');
-      return;
-    }
 
     setisLoading(true);
 
@@ -134,6 +117,7 @@ export default function Home() {
       </p>
       <form onSubmit={handleTransfer} className="max-w-md w-full mb-8">
         <input
+          aria-label="Recipient"
           type="text"
           value={recipientAddress}
           onChange={(e) => setRecipientAddress(e.target.value)}
@@ -141,6 +125,7 @@ export default function Home() {
           className="w-full mb-4 p-2 rounded bg-gray-800 text-white"
         />
         <input
+          aria-label="Amount"
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
@@ -148,12 +133,12 @@ export default function Home() {
           className="w-full mb-10 p-2 rounded bg-gray-800 text-white"
         />
         <button
-          disabled={isLoading}
+          disabled={isLoading || !recipientAddress || !amount}
           type="submit"
           className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full  ${
-            isLoading
-              ? 'bg-lime-900' // Color for disabled state
-              : 'bg-lime-600 hover:bg-lime-800' // Color for active state
+            isLoading || !recipientAddress || !amount
+              ? 'bg-lime-900'
+              : 'bg-lime-600 hover:bg-lime-800'
           }`}
         >
           Send Tokens
@@ -163,9 +148,7 @@ export default function Home() {
         disabled={isLoading}
         onClick={handleClaim}
         className={`px-6 py-3 rounded-md text-lg font-semibold transition duration-300 ease-in-out transform w-full max-w-md  ${
-          isLoading
-            ? 'bg-blue-900' // Color for disabled state
-            : 'bg-blue-600 hover:bg-blue-800' // Color for active state
+          isLoading ? 'bg-blue-900' : 'bg-blue-600 hover:bg-blue-800'
         }`}
       >
         Claim 100 BTS Tokens
